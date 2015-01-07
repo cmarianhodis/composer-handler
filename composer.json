@@ -12,7 +12,8 @@
         }
     ],
     "require": {
-        "php": ">=5.4.0"
+        "php": ">=5.4.0",
+        "incenteev/composer-parameter-handler": "2.1.0"
     },
     "autoload": {
         "psr-4": {
