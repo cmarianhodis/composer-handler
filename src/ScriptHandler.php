@@ -60,7 +60,7 @@ class ScriptHandler
      *
      * @param  CommandEvent $event
      */
-    public function buildParameters(CommandEvent $event)
+    public static function buildParameters(CommandEvent $event)
     {
         if (!is_file(self::bootstrapFilepath()) || is_file(self::doctrineConfigFilepath())) {
             \Incenteev\ParameterHandler\ScriptHandler::buildParameters($event);
