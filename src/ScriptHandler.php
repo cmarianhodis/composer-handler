@@ -62,7 +62,7 @@ class ScriptHandler
      */
     public static function buildParameters(CommandEvent $event)
     {
-        if (!is_file(self::bootstrapFilepath()) || is_file(self::doctrineConfigFilepath())) {
+        if (!is_file(self::bootstrapFilepath()) || !is_file(self::doctrineConfigFilepath())) {
             \Incenteev\ParameterHandler\ScriptHandler::buildParameters($event);
             self::$extraParams = Yaml::parse(file_get_contents(self::parametersFilepath()))['parameters'];
         }
@@ -129,14 +129,14 @@ class ScriptHandler
 
         $doctrineConfig = [
             'dbal' => [
-                'driver'    => $parameters['database_driver'],
-                'host'      => $parameters['database_host'],
-                'port'      => $parameters['database_port'],
-                'dbname'    => $parameters['database_dbname'],
-                'user'      => $parameters['database_user'],
-                'password'  => $parameters['database_password'],
-                'charset'   => $parameters['database_charset'],
-                'collation' => $parameters['database_collation'],
+                'driver'    => self::$extraParams['database_driver'],
+                'host'      => self::$extraParams['database_host'],
+                'port'      => self::$extraParams['database_port'],
+                'dbname'    => self::$extraParams['database_dbname'],
+                'user'      => self::$extraParams['database_user'],
+                'password'  => self::$extraParams['database_password'],
+                'charset'   => self::$extraParams['database_charset'],
+                'collation' => self::$extraParams['database_collation'],
             ],
         ];
 
@@ -148,7 +148,7 @@ class ScriptHandler
      */
     public static function clearBackBeeInstall()
     {
-        if (null !== self::$extraParams && file_exists(self::parametersFilepath())) {
+        if (file_exists(self::parametersFilepath())) {
             unlink(self::parametersFilepath());
         }
     }
