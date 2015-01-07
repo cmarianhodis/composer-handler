@@ -1,0 +1,23 @@
+{
+    "name": "backbee/script-handler",
+    "description": "Composer script handler for \"BackBee Standard Edition\" distribution",
+    "type": "library",
+    "license": "GPL-3.0+",
+    "keywords": ["backbee", "composer", "configuration", "standard edition"],
+    "homepage": "https://github.com/backbee/ComposerHandler",
+    "authors": [
+        {
+            "name": "Eric Chau",
+            "email": "eric.chau@lp-digital.fr"
+        }
+    ],
+    "require": {
+        "php": ">=5.4.0"
+    },
+    "autoload": {
+        "psr-0": {
+            "BackBee\\Standard\\Composer\\": "src/"
+        }
+    },
+    "minimum-stability": "dev"
+}
