@@ -62,7 +62,11 @@ class ScriptHandler
      */
     public static function buildParameters(CommandEvent $event)
     {
-        if (!is_file(self::bootstrapFilepath()) || !is_file(self::doctrineConfigFilepath())) {
+        if (
+            !is_file(self::bootstrapFilepath())
+            || !is_file(self::doctrineConfigFilepath())
+            || !is_file(self::servicesFilepath())
+        ) {
             \Incenteev\ParameterHandler\ScriptHandler::buildParameters($event);
             self::$extraParams = Yaml::parse(file_get_contents(self::parametersFilepath()))['parameters'];
         }
@@ -144,6 +148,26 @@ class ScriptHandler
     }
 
     /**
+     * Builds services configuration files into repository/Config folder if it does not exist
+     *
+     * @param  CommandEvent $event
+     */
+    public static function buildServicesConfig(CommandEvent $event)
+    {
+        if (is_file(self::servicesFilepath()) || null === self::$extraParams) {
+            return;
+        }
+
+        $servicesConfig = [
+            'parameters' => [
+                'secret_key' => self::$extraParams['secret_key'],
+            ],
+        ];
+
+        file_put_contents(self::servicesFilepath(), Yaml::dump($servicesConfig));
+    }
+
+    /**
      * Removes parameters.yml if \Incenteev\ParameterHandler\ScriptHandler::buildParameters created it
      */
     public static function clearBackBeeInstall()
@@ -208,6 +232,16 @@ class ScriptHandler
     protected static function doctrineConfigFilepath()
     {
         return self::repositoryConfigDir().'/doctrine.yml';
+    }
+
+    /**
+     * Returns services.yml filepath
+     *
+     * @return string
+     */
+    protected static function servicesFilepath()
+    {
+        return self::repositoryConfigDir().'/services.yml';
     }
 
     /**
