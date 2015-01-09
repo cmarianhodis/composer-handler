@@ -45,9 +45,6 @@ class ScriptHandler
         'backbee-cache-dir'        => 'cache',
         'backbee-log-dir'          => 'log',
         'backbee-data-dir'         => './repository/Data',
-        'backbee-data-tmp-dir'     => 'Tmp',
-        'backbee-data-media-dir'   => 'Media',
-        'backbee-data-Storage-dir' => 'Storage',
     ];
 
     /**
@@ -96,9 +93,9 @@ class ScriptHandler
         self::mkdir($dataDir = self::buildPath($dataDirname));
         $umask = umask();
         umask(0);
-        self::mkdir(self::buildPath([$dataDirname, $options['backbee-data-media-dir']]), 0777);
-        self::mkdir(self::buildPath([$dataDirname, $options['backbee-data-storage-dir']]), 0777);
-        self::mkdir(self::buildPath([$dataDirname, $options['backbee-data-tmp-dir']]), 0777);
+        self::mkdir(self::buildPath([$dataDirname, 'Media']), 0777);
+        self::mkdir(self::buildPath([$dataDirname, 'Storage']), 0777);
+        self::mkdir(self::buildPath([$dataDirname, 'Tmp']), 0777);
         umask($umask);
 
         $servicesConfig = self::readYamlFile(self::servicesFilepath()) ?: [];
