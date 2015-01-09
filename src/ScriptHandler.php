@@ -130,8 +130,9 @@ class ScriptHandler
             return;
         }
 
-        if (null === self::$extraParams['container_dump_directory']) {
-            $containerDumpDir = self::buildPath([self::getOptions($event)['backbee-cache-dir'], 'container']);
+        $options = self::getOptions($event);
+        if (null === self::$extraParams['container_dump_directory'] && true === $options['generate-structure']) {
+            $containerDumpDir = self::buildPath([$options['backbee-cache-dir'], 'container']);
             self::mkdir($containerDumpDir);
             self::$extraParams['container_dump_directory'] = $containerDumpDir;
         }
