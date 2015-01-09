@@ -40,6 +40,7 @@ class ScriptHandler
      * @var array
      */
     private static $options = [
+        'prompt'                   => true,
         'backbee-cache-dir'        => 'cache',
         'backbee-log-dir'          => 'log',
         'backbee-data-dir'         => './repository/Data',
@@ -63,12 +64,15 @@ class ScriptHandler
     public static function buildParameters(CommandEvent $event)
     {
         if (
-            !is_file(self::bootstrapFilepath())
-            || !is_file(self::doctrineConfigFilepath())
-            || !is_file(self::servicesFilepath())
+            true === self::getOptions($event)['prompt']
+            && (
+                !is_file(self::bootstrapFilepath())
+                || !is_file(self::doctrineConfigFilepath())
+                || !is_file(self::servicesFilepath())
+            )
         ) {
             \Incenteev\ParameterHandler\ScriptHandler::buildParameters($event);
-            self::$extraParams = Yaml::parse(file_get_contents(self::parametersFilepath()))['parameters'];
+            self::$extraParams = self::readYamlFile(self::parametersFilepath())['parameters'];
         }
     }
 
@@ -81,14 +85,29 @@ class ScriptHandler
     {
         $options = self::getOptions($event);
 
-        self::mkdir(self::buildPath($options['backbee-cache-dir']));
-        self::mkdir(self::buildPath($options['backbee-log-dir']));
+        self::mkdir($cacheDir = self::buildPath($options['backbee-cache-dir']), 0777);
+        self::mkdir($logDir = self::buildPath($options['backbee-log-dir']), 0777);
 
-        $dataDir = $options['backbee-data-dir'];
-        self::mkdir(self::buildPath($dataDir));
-        self::mkdir(self::buildPath([$dataDir, $options['backbee-data-media-dir']]), 0777);
-        self::mkdir(self::buildPath([$dataDir, $options['backbee-data-storage-dir']]), 0777);
-        self::mkdir(self::buildPath([$dataDir, $options['backbee-data-tmp-dir']]), 0777);
+        $dataDirname = $options['backbee-data-dir'];
+        self::mkdir($dataDir = self::buildPath($dataDirname));
+        $currentUmask = umask();
+        umask(0);
+        self::mkdir(self::buildPath([$dataDirname, $options['backbee-data-media-dir']]), 0777);
+        self::mkdir(self::buildPath([$dataDirname, $options['backbee-data-storage-dir']]), 0777);
+        self::mkdir(self::buildPath([$dataDirname, $options['backbee-data-tmp-dir']]), 0777);
+        umask($currentUmask);
+
+        $servicesConfig = self::readYamlFile(self::servicesFilepath()) ?: [];
+
+        if (!array_key_exists('parameters', $servicesConfig)) {
+            $servicesConfig['parameters'] = [];
+        }
+
+        $servicesConfig['parameters']['bbapp.cache.dir'] = realpath($cacheDir);
+        $servicesConfig['parameters']['bbapp.log.dir'] = realpath($logDir);
+        $servicesConfig['parameters']['bbapp.data.dir'] = realpath($dataDir);
+
+        self::writeYamlFile(self::servicesFilepath(), $servicesConfig);
     }
 
     /**
@@ -108,15 +127,13 @@ class ScriptHandler
             self::$extraParams['container_dump_directory'] = $containerDumpDir;
         }
 
-        $bootstrap = [
+        self::writeYamlFile(self::bootstrapFilepath(), [
             'debug'     => self::$extraParams['debug'],
             'container' => [
                 'dump_directory' => self::$extraParams['container_dump_directory'],
                 'autogenerate'   => self::$extraParams['cache_autogenerate'],
             ]
-        ];
-
-        file_put_contents(self::bootstrapFilepath(), Yaml::dump($bootstrap));
+        ]);
 
     }
 
@@ -131,7 +148,7 @@ class ScriptHandler
             return;
         }
 
-        $doctrineConfig = [
+        self::writeYamlFile(self::doctrineConfigFilepath(), [
             'dbal' => [
                 'driver'    => self::$extraParams['database_driver'],
                 'host'      => self::$extraParams['database_host'],
@@ -142,9 +159,7 @@ class ScriptHandler
                 'charset'   => self::$extraParams['database_charset'],
                 'collation' => self::$extraParams['database_collation'],
             ],
-        ];
-
-        file_put_contents(self::doctrineConfigFilepath(), Yaml::dump($doctrineConfig));
+        ]);
     }
 
     /**
@@ -158,13 +173,11 @@ class ScriptHandler
             return;
         }
 
-        $servicesConfig = [
+        self::writeYamlFile(self::servicesFilepath(), [
             'parameters' => [
                 'secret_key' => self::$extraParams['secret_key'],
             ],
-        ];
-
-        file_put_contents(self::servicesFilepath(), Yaml::dump($servicesConfig));
+        ]);
     }
 
     /**
@@ -253,6 +266,31 @@ class ScriptHandler
     protected static function parametersFilepath()
     {
         return self::repositoryConfigDir().'/parameters.yml';
+    }
+
+    /**
+     * Reads Yaml file if provided path exists
+     *
+     * @param  string $path
+     * @return null|array
+     */
+    protected static function readYamlFile($path)
+    {
+        $result = null;
+        if (is_readable($path)) {
+            $result = Yaml::parse(file_get_contents($path));
+        }
+
+        return $result;
+    }
+
+    /**
+     * @param  string $path
+     * @param  array $config
+     */
+    protected static function writeYamlFile($path, array $config)
+    {
+        file_put_contents($path, Yaml::dump($config));
     }
 
     /**
