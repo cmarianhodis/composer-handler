@@ -41,6 +41,7 @@ class ScriptHandler
      */
     private static $options = [
         'prompt'                   => true,
+        'generate-structure'       => true,
         'backbee-cache-dir'        => 'cache',
         'backbee-log-dir'          => 'log',
         'backbee-data-dir'         => './repository/Data',
@@ -84,18 +85,21 @@ class ScriptHandler
     public static function buildBackBeeStructure(CommandEvent $event)
     {
         $options = self::getOptions($event);
+        if (false === $options['generate-structure']) {
+            return;
+        }
 
         self::mkdir($cacheDir = self::buildPath($options['backbee-cache-dir']), 0777);
         self::mkdir($logDir = self::buildPath($options['backbee-log-dir']), 0777);
 
         $dataDirname = $options['backbee-data-dir'];
         self::mkdir($dataDir = self::buildPath($dataDirname));
-        $currentUmask = umask();
+        $umask = umask();
         umask(0);
         self::mkdir(self::buildPath([$dataDirname, $options['backbee-data-media-dir']]), 0777);
         self::mkdir(self::buildPath([$dataDirname, $options['backbee-data-storage-dir']]), 0777);
         self::mkdir(self::buildPath([$dataDirname, $options['backbee-data-tmp-dir']]), 0777);
-        umask($currentUmask);
+        umask($umask);
 
         $servicesConfig = self::readYamlFile(self::servicesFilepath()) ?: [];
 
@@ -103,9 +107,17 @@ class ScriptHandler
             $servicesConfig['parameters'] = [];
         }
 
-        $servicesConfig['parameters']['bbapp.cache.dir'] = realpath($cacheDir);
-        $servicesConfig['parameters']['bbapp.log.dir'] = realpath($logDir);
-        $servicesConfig['parameters']['bbapp.data.dir'] = realpath($dataDir);
+        if (!isset($servicesConfig['parameters']['bbapp.cache.dir'])) {
+            $servicesConfig['parameters']['bbapp.cache.dir'] = realpath($cacheDir);
+        }
+
+        if (!isset($servicesConfig['parameters']['bbapp.log.dir'])) {
+            $servicesConfig['parameters']['bbapp.log.dir'] = realpath($logDir);
+        }
+
+        if (!isset($servicesConfig['parameters']['bbapp.data.dir'])) {
+            $servicesConfig['parameters']['bbapp.data.dir'] = realpath($dataDir);
+        }
 
         self::writeYamlFile(self::servicesFilepath(), $servicesConfig);
     }
@@ -169,15 +181,20 @@ class ScriptHandler
      */
     public static function buildServicesConfig(CommandEvent $event)
     {
-        if (is_file(self::servicesFilepath()) || null === self::$extraParams) {
+        if (null === self::$extraParams) {
             return;
         }
 
-        self::writeYamlFile(self::servicesFilepath(), [
-            'parameters' => [
-                'secret_key' => self::$extraParams['secret_key'],
-            ],
-        ]);
+        $services = self::readYamlFile(self::servicesFilepath()) ?: [];
+        if (!array_key_exists('parameters', $services)) {
+            $services['parameters'] = [];
+        }
+
+        if (!isset($services['parameters']['secret_key'])) {
+            $services['parameters']['secret_key'] = self::$extraParams['secret_key'];
+        }
+
+        self::writeYamlFile(self::servicesFilepath(), $services);
     }
 
     /**
