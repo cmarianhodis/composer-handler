@@ -86,13 +86,13 @@ class ScriptHandler
             return;
         }
 
+        $umask = umask();
+        umask(0);
         self::mkdir($cacheDir = self::buildPath($options['backbee-cache-dir']), 0777);
         self::mkdir($logDir = self::buildPath($options['backbee-log-dir']), 0777);
 
         $dataDirname = $options['backbee-data-dir'];
         self::mkdir($dataDir = self::buildPath($dataDirname));
-        $umask = umask();
-        umask(0);
         self::mkdir(self::buildPath([$dataDirname, 'Media']), 0777);
         self::mkdir(self::buildPath([$dataDirname, 'Storage']), 0777);
         self::mkdir(self::buildPath([$dataDirname, 'Tmp']), 0777);
