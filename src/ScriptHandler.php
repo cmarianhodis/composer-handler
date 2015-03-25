@@ -22,6 +22,7 @@
 namespace BackBee\Standard\Composer;
 
 use Composer\Script\CommandEvent;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Yaml\Yaml;
 
 /**
@@ -203,6 +204,31 @@ class ScriptHandler
         if (file_exists(self::parametersFilepath())) {
             unlink(self::parametersFilepath());
         }
+    }
+
+    /**
+     * Install Javascript client to ``repository/Resources/toolbar`` folder
+     */
+    public static function moveClient()
+    {
+        $filesystem = new Filesystem();
+        $filesystem->mirror(self::getVendorPath(), self::getToolbarPath());
+    }
+
+    /**
+     * path to BbCoreJS vendor
+     */
+    private static function getVendorPath()
+    {
+        return self::rootDir().DIRECTORY_SEPARATOR.'vendor'.DIRECTORY_SEPARATOR.'backbee'.DIRECTORY_SEPARATOR.'BbCoreJs';
+    }
+
+    /**
+     * path to Toolbar folder
+     */
+    private static function getToolbarPath()
+    {
+        return self::repositoryConfigDir().DIRECTORY_SEPARATOR.'Resources'.DIRECTORY_SEPARATOR .'toolbar'.DIRECTORY_SEPARATOR;
     }
 
     /**
