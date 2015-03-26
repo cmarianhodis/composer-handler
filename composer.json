@@ -21,5 +21,10 @@
             "BackBee\\Standard\\Composer\\": "src/"
         }
     },
-    "minimum-stability": "dev"
+    "minimum-stability": "stable",
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0-dev"
+        }
+    }
 }
