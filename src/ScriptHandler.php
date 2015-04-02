@@ -220,7 +220,7 @@ class ScriptHandler
      */
     private static function getVendorPath()
     {
-        return self::rootDir().DIRECTORY_SEPARATOR.'vendor'.DIRECTORY_SEPARATOR.'backbee'.DIRECTORY_SEPARATOR.'client-js';
+        return self::rootDir().DIRECTORY_SEPARATOR.'vendor'.DIRECTORY_SEPARATOR.'backbee'.DIRECTORY_SEPARATOR.'bb-core-js';
     }
 
     /**
