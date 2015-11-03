@@ -117,6 +117,8 @@ class ScriptHandler
             $servicesConfig['parameters']['bbapp.data.dir'] = realpath($dataDir);
         }
 
+        $servicesConfig['parameters']['bbapp.classcontent.exception_on_unknown_classname'] = false;
+
         self::writeYamlFile(self::servicesFilepath(), $servicesConfig);
     }
 
