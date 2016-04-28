@@ -117,6 +117,7 @@ class ScriptHandler
         }
 
         $servicesConfig['parameters']['bbapp.classcontent.exception_on_unknown_classname'] = false;
+        $servicesConfig['parameters']['secret_key'] = md5(uniqid('', true));
 
         self::writeYamlFile(self::servicesFilepath(), $servicesConfig);
     }
