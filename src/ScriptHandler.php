@@ -21,7 +21,7 @@
 
 namespace BackBee\Standard\Composer;
 
-use Composer\Script\CommandEvent;
+use Composer\Script\Event;
 use Symfony\Component\Yaml\Yaml;
 
 /**
@@ -57,9 +57,9 @@ class ScriptHandler
      * Calls to \Incenteev\ParameterHandler\ScriptHandler if bootstrap.yml and/or doctrine.yml are not
      * created
      *
-     * @param  CommandEvent $event
+     * @param  Event $event
      */
-    public static function buildParameters(CommandEvent $event)
+    public static function buildParameters(Event $event)
     {
         if (
             true === self::getOptions($event)['prompt']
@@ -77,9 +77,9 @@ class ScriptHandler
     /**
      * Generates BackBee folder basic structure (cache/, log/, Data/ directories)
      *
-     * @param  CommandEvent $event
+     * @param  Event $event
      */
-    public static function buildBackBeeStructure(CommandEvent $event)
+    public static function buildBackBeeStructure(Event $event)
     {
         $options = self::getOptions($event);
         if (false === $options['generate-structure']) {
@@ -125,9 +125,9 @@ class ScriptHandler
     /**
      * If bootstrap.yml does not exist in repository/Config, this method will create it
      *
-     * @param  CommandEvent $event
+     * @param  Event $event
      */
-    public static function buildBootstrap(CommandEvent $event)
+    public static function buildBootstrap(Event $event)
     {
         if (is_file(self::bootstrapFilepath()) || null === self::$extraParams) {
             return;
@@ -153,9 +153,9 @@ class ScriptHandler
     /**
      * Builds doctrine configuration files into repository/Config folder if it does not exist
      *
-     * @param  CommandEvent $event
+     * @param  Event $event
      */
-    public static function buildDoctrineConfig(CommandEvent $event)
+    public static function buildDoctrineConfig(Event $event)
     {
         if (is_file(self::doctrineConfigFilepath()) || null === self::$extraParams) {
             return;
@@ -178,9 +178,9 @@ class ScriptHandler
     /**
      * Builds services configuration files into repository/Config folder if it does not exist
      *
-     * @param  CommandEvent $event
+     * @param  Event $event
      */
-    public static function buildServicesConfig(CommandEvent $event)
+    public static function buildServicesConfig(Event $event)
     {
         if (null === self::$extraParams) {
             return;
@@ -337,10 +337,10 @@ class ScriptHandler
     /**
      * Retrieves composer.json 'extra' parameters and merge it with default option values
      *
-     * @param  CommandEvent $event
+     * @param  Event $event
      * @return array
      */
-    protected static function getOptions(CommandEvent $event)
+    protected static function getOptions(Event $event)
     {
         return array_merge(self::$options, $event->getComposer()->getPackage()->getExtra());
     }
