@@ -1,5 +1,5 @@
 {
-    "name": "backbee/script-handler",
+    "name": "backbee/composer-handler",
     "description": "Composer script handler for \"BackBee Standard Edition\" distribution",
     "type": "library",
     "license": "GPL-3.0+",
